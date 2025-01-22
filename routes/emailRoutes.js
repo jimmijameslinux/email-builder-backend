@@ -10,9 +10,10 @@ const EmailTemplate = require('../models/EmailTemplate');
 
 // API to get email layout
 router.get('/getEmailLayout', (req, res) => {
-    const filePath = "E:/Email_builder/email-builder-backend/layout.html"
-    if (fs.existsSync(filePath)) {
-        const layout = fs.readFileSync(filePath, 'utf-8');
+    // const filePath = "E:/Email_builder/email-builder-backend/layout.html"
+    const layoutPath = path.join(__dirname, '../layout.html'); // Absolute path
+    if (fs.existsSync(layoutPath)) {
+        const layout = fs.readFileSync(layoutPath, 'utf-8');
         res.send(layout);
     } else {
         res.status(404).json({ error: 'Layout file not found' });
