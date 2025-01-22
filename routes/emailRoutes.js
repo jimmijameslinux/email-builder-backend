@@ -10,36 +10,36 @@ const EmailTemplate = require('../models/EmailTemplate');
 
 // API to get email layout
 router.get('/getEmailLayout', (req, res) => {
-    // const filePath = "E:/Email_builder/email-builder-backend/layout.html"
-    const layoutPath = path.join(__dirname, '../layout.html'); // Absolute path
-    if (fs.existsSync(layoutPath)) {
-        const layout = fs.readFileSync(layoutPath, 'utf-8');
-        res.send(layout);
-    } else {
-        res.status(404).json({ error: 'Layout file not found' });
-    }
+  // const filePath = "E:/Email_builder/email-builder-backend/layout.html"
+  const layoutPath = path.join(__dirname, '../layout.html'); // Absolute path
+  if (fs.existsSync(layoutPath)) {
+    const layout = fs.readFileSync(layoutPath, 'utf-8');
+    res.send(layout);
+  } else {
+    res.status(404).json({ error: 'Layout file not found' });
+  }
 });
 
 
 // API route to handle image uploads
 router.post('/uploadImage', upload.single('image'), (req, res) => {
-    if (!req.file) {
-        return res.status(400).json({ error: 'No file uploaded' });
-    }
-    res.json({ imageUrl: `/uploads/${req.file.filename}` });
+  if (!req.file) {
+    return res.status(400).json({ error: 'No file uploaded' });
+  }
+  res.json({ imageUrl: `/uploads/${req.file.filename}` });
 });
 
 
 // Save template to database and generate renderedOutput.html
 router.post('/uploadEmailConfig', async (req, res) => {
-    try {
-        // Save template data in the database
-        const template = new EmailTemplate(req.body);
-        await template.save();
+  try {
+    // Save template data in the database
+    const template = new EmailTemplate(req.body);
+    await template.save();
 
-        // Generate rendered HTML
-        const { title, content, footer, imageUrl } = req.body;
-        const outputHtml = `
+    // Generate rendered HTML
+    const { title, content, footer, imageUrl } = req.body;
+    const outputHtml = `
       <!DOCTYPE html>
       <html lang="en">
       <head>
@@ -67,22 +67,22 @@ router.post('/uploadEmailConfig', async (req, res) => {
       </html>
     `;
 
-        // Save the rendered HTML as renderedOutput.html
-        const outputPath = path.join(__dirname, '../renderedOutput.html');
-        fs.writeFileSync(outputPath, outputHtml);
+    // Save the rendered HTML as renderedOutput.html
+    const outputPath = path.join(__dirname, '../renderedOutput.html');
+    fs.writeFileSync(outputPath, outputHtml);
 
-        res.send({ message: 'Template saved and rendered output generated!' });
-    } catch (error) {
-        console.error('Error saving template:', error);
-        res.status(500).send({ message: 'Error saving template.' });
-    }
+    res.send({ message: 'Template saved and rendered output generated!', renderedHtml: outputHtml });
+  } catch (error) {
+    console.error('Error saving template:', error);
+    res.status(500).send({ message: 'Error saving template.' });
+  }
 });
 
 router.post('/renderAndDownloadTemplate', (req, res) => {
-    const { layout, data } = req.body;
-    const filledTemplate = layout.replace(/\{\{(.*?)\}\}/g, (_, key) => data[key.trim()] || '');
-    res.setHeader('Content-disposition', 'attachment; filename=template.html');
-    res.send(filledTemplate);
+  const { layout, data } = req.body;
+  const filledTemplate = layout.replace(/\{\{(.*?)\}\}/g, (_, key) => data[key.trim()] || '');
+  res.setHeader('Content-disposition', 'attachment; filename=template.html');
+  res.send(filledTemplate);
 });
 
 module.exports = router;
